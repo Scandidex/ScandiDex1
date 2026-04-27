@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScandiDex — The Scandinavian TCG Marketplace</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+/* ===== THEME VARS ===== */
+[data-theme="dark"] {
+  --bg: #0e0f14;
+  --bg2: #151720;
+  --surface: #1a1d2e;
+  --surface2: #20243a;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f2ff;
+  --text2: rgba(240,242,255,0.6);
+  --text3: rgba(240,242,255,0.35);
+  --accent: #6C8EFF;
+  --accent2: #4ECDC4;
+  --gold: #FFD166;
+  --red: #FF6B6B;
+  --green: #06D6A0;
+  --orange: #FF9F43;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --card-hover: rgba(108,142,255,0.06);
+}
+[data-theme="light"] {
+  --bg: #f4f5f7;
+  --bg2: #eceef2;
+  --surface: #ffffff;
+  --surface2: #f8f9fb;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #111827;
+  --text2: rgba(17,24,39,0.6);
+  --text3: rgba(17,24,39,0.35);
+  --accent: #4a70ff;
+  --accent2: #0ea5a0;
+  --gold: #d4a017;
+  --red: #e53e3e;
+  --green: #059669;
+  --orange: #d97706;
+  --shadow: 0 8px 32px rgba(0,0,0,0.1);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --card-hover: rgba(74,112,255,0.04);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+  overflow-x: hidden;
+}
+img { display: block; }
+button, input, select, textarea { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ===== LAYOUT ===== */
+.app-shell { display: flex; height: 100vh; overflow: hidden; }
+.sidebar {
+  width: 220px; min-width: 220px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transition: all 0.3s;
+  z-index: 100;
+}
+.main-content { flex: 1; overflow-y: auto; }
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ===== SIDEBAR ===== */
+.sidebar-logo {
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-mark {
+  display: flex; align-items: center; gap: 10px; cursor: pointer;
+}
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px; color: #fff;
+  flex-shrink: 0;
+}
+.logo-text { font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px; letter-spacing: -0.3px; }
+.logo-text span { color: var(--accent2); }
+.logo-sub { font-size: 10px; color: var(--text3); font-weight: 500; letter-spacing: 0.5px; margin-top: 2px; }
+
+.sidebar-nav { flex: 1; padding: 10px 10px; overflow-y: auto; }
+.nav-section { margin-bottom: 20px; }
+.nav-section-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--text3); padding: 0 10px; margin-bottom: 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: 13.5px; font-weight: 500; color: var(--text2);
+  cursor: pointer; transition: all 0.18s; border: none; background: none;
+  width: 100%; text-align: left; position: relative;
+}
+.nav-item:hover { background: var(--border); color: var(--text); }
+.nav-item.active { background: rgba(108,142,255,0.12); color: var(--accent); font-weight: 600; }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; background: var(--accent); color: #fff;
+  font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 100px;
+  min-width: 18px; text-align: center;
+}
+.nav-badge.red { background: var(--red); }
+
+.sidebar-bottom {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+.user-snippet {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 10px; cursor: pointer;
+  transition: background 0.18s;
+}
+.user-snippet:hover { background: var(--border); }
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 11px; color: var(--text3); }
+.user-snippet .logout-btn { font-size: 14px; color: var(--text3); cursor: pointer; background: none; border: none; padding: 2px; }
+
+/* ===== TOP BAR ===== */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 24px;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+}
+.topbar-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; flex-shrink: 0; }
+.topbar-search {
+  flex: 1; max-width: 420px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 100px; padding: 8px 16px;
+  transition: border-color 0.2s;
+}
+.topbar-search:focus-within { border-color: var(--accent); }
+.topbar-search input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 13.5px; }
+.topbar-search input::placeholder { color: var(--text3); }
+.topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.icon-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.18s; color: var(--text2); font-size: 16px;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+.cart-bubble { position: relative; }
+.cart-bubble .badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--red); color: #fff; font-size: 9px; font-weight: 800;
+  display: none; align-items: center; justify-content: center;
+}
+.cart-bubble .badge.show { display: flex; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 10px;
+  font-size: 13.5px; font-weight: 600; cursor: pointer; border: none;
+  transition: all 0.2s; letter-spacing: -0.1px;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(108,142,255,0.35); }
+.btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.btn-success { background: rgba(6,214,160,0.12); border: 1px solid rgba(6,214,160,0.3); color: var(--green); }
+.btn-danger { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.25); color: var(--red); }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+.btn-lg { padding: 12px 24px; font-size: 15px; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; transition: all 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-sm); }
+.card-elevated { box-shadow: var(--shadow-sm); }
+
+/* ===== GRID LAYOUTS ===== */
+.content-wrap { padding: 20px 24px; max-width: 1400px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+
+/* ===== FORM ELEMENTS ===== */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; }
+.form-input, .form-select, .form-textarea {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px; color: var(--text);
+  font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-select option { background: var(--surface); }
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ===== TAGS / CHIPS ===== */
+.chip {
+  display: inline-flex; align-items: center;
+  padding: 5px 12px; border-radius: 100px;
+  border: 1px solid var(--border); background: none;
+  font-size: 12px; font-weight: 500; color: var(--text2);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.chip:hover, .chip.active { border-color: var(--accent); color: var(--accent); background: rgba(108,142,255,0.08); }
+.chip.active-green { border-color: var(--green); color: var(--green); background: rgba(6,214,160,0.08); }
+.chips-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ===== CONDITION BADGES ===== */
+.cond-badge { padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.cond-M { background: rgba(6,214,160,0.15); color: var(--green); }
+.cond-NM { background: rgba(108,142,255,0.15); color: var(--accent); }
+.cond-LP { background: rgba(255,209,102,0.15); color: var(--gold); }
+.cond-MP { background: rgba(255,159,67,0.15); color: var(--orange); }
+.cond-HP { background: rgba(255,107,107,0.15); color: var(--red); }
+.cond-DMG { background: rgba(255,107,107,0.25); color: var(--red); }
+.cond-PSA, .cond-CGC, .cond-BGS { background: rgba(156,124,255,0.15); color: #a78bfa; }
+
+/* ===== TOAST ===== */
+.toast-stack { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 18px;
+  font-size: 13.5px; font-weight: 500; color: var(--text);
+  box-shadow: var(--shadow); pointer-events: all;
+  transform: translateX(120%); opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 300px;
+}
+.toast.show { transform: translateX(0); opacity: 1; }
+.toast.success { border-color: var(--green); }
+.toast.error { border-color: var(--red); }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+  z-index: 500; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 20px; padding: 24px; width: 100%; max-width: 480px;
+  max-height: 90vh; overflow-y: auto;
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; }
+.modal-close { width: 30px; height: 30px; border-radius: 8px; background: var(--border); border: none; cursor: pointer; color: var(--text2); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.modal-close:hover { background: var(--red); color: #fff; }
+
+/* ===== SECTION HEADER ===== */
+.section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.section-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; }
+.section-sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+
+/* ========================================
+   HOME PAGE
+======================================== */
+.home-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px 32px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 24px;
+  background-image: radial-gradient(ellipse at 80% 50%, rgba(108,142,255,0.08) 0%, transparent 60%);
+}
+.home-hero-text { flex: 1; }
+.home-hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--accent); margin-bottom: 10px;
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot { 0%,100% { opacity:1; transform: scale(1); } 50% { opacity:0.4; transform: scale(1.4); } }
+.home-hero h1 { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 700; line-height: 1.1; letter-spacing: -0.5px; margin-bottom: 8px; }
+.home-hero p { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 16px; }
+.hero-btns { display: flex; gap: 8px; }
+.hero-stats { display: flex; gap: 24px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+.stat-item { text-align: center; }
+.stat-n { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; }
+.stat-l { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+
+/* Ticker */
+.ticker-container {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  display: flex; overflow: hidden; margin-bottom: 20px; height: 40px; align-items: center;
+}
+.ticker-label {
+  padding: 0 14px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--accent); border-right: 1px solid var(--border);
+  white-space: nowrap; height: 100%; display: flex; align-items: center; background: rgba(108,142,255,0.06);
+}
+.ticker-track { overflow: hidden; flex: 1; }
+.ticker-inner { display: flex; gap: 32px; animation: ticker 30s linear infinite; width: max-content; padding: 0 20px; align-items: center; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; white-space: nowrap; color: var(--text2); }
+.ticker-item .price { font-family: 'DM Mono', monospace; color: var(--gold); font-size: 12px; }
+.ticker-sep { color: var(--border2); }
+
+/* Featured grid */
+.featured-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; cursor: pointer; transition: all 0.22s;
+}
+.featured-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,142,255,0.15); }
+.fc-img {
+  height: 130px; display: flex; align-items: center; justify-content: center;
+  font-size: 52px; position: relative;
+}
+.fc-badge {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px;
+}
+.fc-body { padding: 10px 12px; }
+.fc-set { font-size: 10.5px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px; }
+.fc-name { font-size: 13.5px; font-weight: 700; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fc-bottom { display: flex; justify-content: space-between; align-items: center; }
+.fc-price { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
+.fc-seller { font-size: 10.5px; color: var(--text3); margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+.star { color: var(--gold); font-size: 10px; }
+
+/* ========================================
+   BROWSE PAGE
+======================================== */
+.browse-layout { display: grid; grid-template-columns: 240px 1fr; gap: 20px; align-items: start; }
+.filter-sidebar {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px; position: sticky; top: 80px;
+}
+.filter-group { margin-bottom: 18px; }
+.filter-group-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 8px; }
+.filter-group .chips-row { gap: 5px; }
+.price-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.browse-main {}
+.browse-toolbar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
+.browse-toolbar .form-select { width: auto; padding: 8px 12px; font-size: 13px; }
+.browse-info { font-size: 12.5px; color: var(--text3); margin-bottom: 12px; }
+
+/* Listing card */
+.listing-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; cursor: pointer; transition: all 0.2s;
+}
+.listing-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,142,255,0.12); }
+.lc-img { height: 140px; display: flex; align-items: center; justify-content: center; font-size: 58px; position: relative; }
+.lc-body { padding: 10px 12px 12px; }
+.lc-set-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.lc-set { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+.lc-flag { font-size: 13px; }
+.lc-name { font-size: 13px; font-weight: 700; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lc-price { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; }
+.lc-seller { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.lc-trust { display: flex; align-items: center; gap: 4px; }
+.trust-score { font-size: 11px; font-weight: 600; color: var(--green); }
+
+/* ========================================
+   SELL PAGE
+======================================== */
+.sell-stepper { display: flex; gap: 0; margin-bottom: 24px; }
+.step {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  position: relative;
+}
+.step:not(:last-child)::after {
+  content: ''; position: absolute; top: 16px; left: 50%; width: 100%; height: 2px;
+  background: var(--border);
+}
+.step.done::after { background: var(--accent); }
+.step-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--text3); z-index: 1;
+  transition: all 0.3s;
+}
+.step.active .step-circle { border-color: var(--accent); color: var(--accent); background: rgba(108,142,255,0.1); }
+.step.done .step-circle { border-color: var(--accent); background: var(--accent); color: #fff; }
+.step-label { font-size: 11px; color: var(--text3); font-weight: 500; text-align: center; }
+.step.active .step-label { color: var(--accent); font-weight: 600; }
+
+.sell-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
+.photo-upload-area {
+  border: 2px dashed var(--border); border-radius: 14px; padding: 32px;
+  text-align: center; cursor: pointer; transition: border-color 0.2s;
+  background: var(--surface2);
+}
+.photo-upload-area:hover { border-color: var(--accent); }
+.photo-upload-icon { font-size: 36px; margin-bottom: 10px; }
+.photo-preview { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 12px; }
+.photo-thumb { aspect-ratio: 3/4; border-radius: 8px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid var(--border); }
+
+.price-breakdown {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+}
+.pb-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+.pb-row.total { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 10px; font-weight: 700; }
+.pb-payout { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--green); }
+
+/* ========================================
+   CART PAGE
+======================================== */
+.cart-layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+.cart-item-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+  transition: all 0.2s;
+}
+.ci-img { width: 60px; height: 84px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+.ci-info { flex: 1; min-width: 0; }
+.ci-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ci-set { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+.ci-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.ci-price { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--gold); flex-shrink: 0; }
+.ci-remove { width: 28px; height: 28px; border-radius: 8px; background: none; border: 1px solid var(--border); color: var(--text3); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.ci-remove:hover { background: rgba(255,107,107,0.1); border-color: var(--red); color: var(--red); }
+
+.order-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; position: sticky; top: 80px; }
+.ob-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.ob-row { display: flex; justify-content: space-between; font-size: 13.5px; padding: 5px 0; }
+.ob-row.muted { color: var(--text2); }
+.ob-row.total { font-weight: 700; font-size: 15px; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 6px; }
+.payment-badges { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+.pay-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+.pay-badge.active { border-color: var(--accent); color: var(--accent); background: rgba(108,142,255,0.08); }
+
+/* ========================================
+   PROFILE / MY ACCOUNT PAGE
+======================================== */
+.profile-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start; }
+.profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; position: sticky; top: 80px; text-align: center; }
+.profile-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 700; color: #fff;
+  margin: 0 auto 12px;
+}
+.profile-name { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.profile-handle { font-size: 12px; color: var(--text3); margin-bottom: 12px; }
+.verified-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(6,214,160,0.1); border: 1px solid rgba(6,214,160,0.25);
+  border-radius: 100px; padding: 3px 10px;
+  font-size: 11px; font-weight: 600; color: var(--green); margin-bottom: 14px;
+}
+.profile-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+.ps-stat { background: var(--surface2); border-radius: 10px; padding: 10px 6px; }
+.ps-n { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; }
+.ps-l { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.trust-bar { background: var(--surface2); border-radius: 10px; padding: 12px; margin-bottom: 14px; text-align: left; }
+.trust-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); margin-bottom: 8px; }
+.trust-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 3px 0; }
+.trust-row .val { font-weight: 600; }
+.trust-row .val.good { color: var(--green); }
+.trust-row .val.ok { color: var(--gold); }
+
+.tabs-bar { display: flex; gap: 2px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 3px; margin-bottom: 16px; }
+.tab-btn {
+  flex: 1; padding: 8px; border-radius: 9px; background: none; border: none;
+  font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer;
+  transition: all 0.15s; text-align: center;
+}
+.tab-btn.active { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
+
+.listing-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+  margin-bottom: 8px; transition: all 0.2s;
+}
+.listing-row:hover { border-color: var(--border2); }
+.lr-img { width: 48px; height: 68px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+.lr-info { flex: 1; min-width: 0; }
+.lr-name { font-size: 13.5px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lr-set { font-size: 11px; color: var(--text3); margin-bottom: 5px; }
+.lr-tags { display: flex; gap: 5px; }
+.lr-right { text-align: right; flex-shrink: 0; }
+.lr-price { font-family: 'DM Mono', monospace; font-size: 13.5px; font-weight: 500; color: var(--gold); }
+.status-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; margin-top: 3px; }
+.sp-active { background: rgba(6,214,160,0.15); color: var(--green); }
+.sp-sold { background: rgba(108,142,255,0.15); color: var(--accent); }
+.sp-pending { background: rgba(255,209,102,0.15); color: var(--gold); }
+
+.purchase-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px;
+}
+.pr-name { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+.pr-date { font-size: 11px; color: var(--text3); }
+.pr-price { font-family: 'DM Mono', monospace; font-size: 13px; text-align: right; color: var(--gold); }
+.pr-status { font-size: 11px; font-weight: 600; margin-top: 2px; }
+.delivered { color: var(--green); }
+.in-transit { color: var(--accent2); }
+
+/* ========================================
+   SHIPPING PAGE
+======================================== */
+.shipping-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 12px; }
+.shipping-order { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+.so-left { flex: 1; min-width: 0; }
+.so-name { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.so-detail { font-size: 12px; color: var(--text3); }
+.so-right { text-align: right; flex-shrink: 0; }
+.track-id { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); background: rgba(108,142,255,0.1); padding: 3px 8px; border-radius: 6px; margin-top: 4px; display: inline-block; }
+.tracking-timeline { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); display: none; }
+.tracking-timeline.open { display: block; }
+.tl-item { display: flex; gap: 12px; padding-bottom: 16px; position: relative; }
+.tl-item:not(:last-child)::before { content: ''; position: absolute; left: 11px; top: 24px; width: 2px; height: calc(100% - 8px); background: var(--border); }
+.tl-dot { width: 24px; height: 24px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; z-index: 1; }
+.tl-dot.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tl-content { flex: 1; }
+.tl-event { font-size: 13px; font-weight: 600; }
+.tl-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.postnord-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,116,182,0.1); border: 1px solid rgba(0,116,182,0.25); border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 700; color: #0074b6; }
+
+/* ========================================
+   DISPUTES PAGE
+======================================== */
+.dispute-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 10px; }
+.dispute-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.dispute-id { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.dispute-status { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; }
+.ds-open { background: rgba(255,209,102,0.15); color: var(--gold); }
+.ds-resolved { background: rgba(6,214,160,0.15); color: var(--green); }
+.ds-pending { background: rgba(108,142,255,0.15); color: var(--accent); }
+.dispute-msg { font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 12px; }
+
+/* ========================================
+   NOTIFICATIONS PAGE
+======================================== */
+.notif-item {
+  display: flex; gap: 12px; padding: 14px 16px;
+  border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s;
+}
+.notif-item:hover { background: var(--card-hover); }
+.notif-item.unread { background: rgba(108,142,255,0.04); }
+.notif-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.notif-body { flex: 1; min-width: 0; }
+.notif-title { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+.notif-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
+.notif-time { font-size: 11px; color: var(--text3); flex-shrink: 0; margin-top: 2px; }
+.unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 6px; }
+
+/* ========================================
+   SETTINGS PAGE
+======================================== */
+.settings-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.settings-section-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label { font-size: 13.5px; font-weight: 500; }
+.toggle-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--border2); border-radius: 100px; cursor: pointer; transition: 0.3s; }
+.toggle-slider:before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; }
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+.toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+/* ========================================
+   AUTH PAGES
+======================================== */
+.auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--bg); }
+.auth-box { width: 100%; max-width: 420px; }
+.auth-logo { text-align: center; margin-bottom: 28px; }
+.auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
+.auth-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.auth-sub { font-size: 13px; color: var(--text2); margin-bottom: 22px; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; font-size: 12px; color: var(--text3); }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.social-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); font-size: 13.5px; font-weight: 600; cursor: pointer; color: var(--text); transition: all 0.18s; margin-bottom: 8px; }
+.social-btn:hover { border-color: var(--accent); }
+.auth-switch { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text2); }
+.auth-switch a { color: var(--accent); font-weight: 600; cursor: pointer; }
+
+/* ========================================
+   THEME TOGGLE BUTTON
+======================================== */
+.theme-toggle-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; transition: all 0.2s; color: var(--text2);
+}
+.theme-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text3); }
+.empty-state .es-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state .es-title { font-size: 16px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+.empty-state .es-sub { font-size: 13px; line-height: 1.6; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* RATINGS */
+.stars-row { display: flex; align-items: center; gap: 4px; }
+.stars { color: var(--gold); font-size: 12px; }
+.rating-num { font-size: 12px; font-weight: 600; }
+.rating-count { font-size: 11px; color: var(--text3); }
+
+/* MOBILE BOTTOM NAV */
+.mobile-nav { display: none; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .mobile-nav {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 8px 12px 16px; z-index: 200; justify-content: space-around;
+  }
+  .mob-nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 10px; cursor: pointer; transition: all 0.15s; background: none; border: none; color: var(--text3); }
+  .mob-nav-item.active { color: var(--accent); }
+  .mob-nav-item .icon { font-size: 20px; }
+  .mob-nav-item .label { font-size: 10px; font-weight: 600; }
+  .main-content { padding-bottom: 80px; }
+  .browse-layout { grid-template-columns: 1fr; }
+  .filter-sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; border-radius: 0; transform: translateX(-100%); transition: transform 0.3s; z-index: 300; overflow-y: auto; }
+  .filter-sidebar.open { transform: translateX(0); }
+  .cart-layout { grid-template-columns: 1fr; }
+  .profile-layout { grid-template-columns: 1fr; }
+  .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .topbar { padding: 10px 16px; }
+  .content-wrap { padding: 16px; }
+  .home-hero { flex-direction: column; padding: 20px; }
+  .auth-page { align-items: flex-start; padding-top: 40px; }
+}
+
+/* Language flags */
+.lang-flag { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH MODALS ===== -->
+<div id="loginModal" class="modal-overlay open">
+  <div class="auth-page" style="position:fixed;inset:0;overflow-y:auto;">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <div class="logo-icon" style="width:44px;height:44px;font-size:20px;">S</div>
+          <span style="font-family:'Fraunces',serif;font-size:24px;font-weight:700;">Scandi<span style="color:var(--accent2)">Dex</span></span>
+        </div>
+        <div style="font-size:12px;color:var(--text3);">The Scandinavian TCG Marketplace</div>
+      </div>
+      <div class="auth-card" id="loginCard">
+        <div class="auth-title">Welcome back</div>
+        <div class="auth-sub">Sign in to your ScandiDex account</div>
+        <div class="social-btn" onclick="doLogin('google')">🇸 Continue with Google</div>
+        <div class="social-btn" onclick="doLogin('bankid')">🏦 BankID / MitID / BankID SE</div>
+        <div class="auth-divider">or</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" placeholder="you@example.com" id="loginEmail">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" type="password" placeholder="••••••••" id="loginPass">
+          </div>
+          <button class="btn btn-primary btn-full btn-lg" onclick="doLogin('email')" style="margin-top:4px;">Sign In →</button>
+        </div>
+        <div class="auth-switch">No account? <a onclick="showAuthCard('signup')">Create one free →</a></div>
+        <div class="auth-switch" style="margin-top:6px;"><a onclick="showAuthCard('forgot')" style="color:var(--text3);">Forgot password?</a></div>
+      </div>
+      <div class="auth-card" id="signupCard" style="display:none;">
+        <div class="auth-title">Create account</div>
+        <div class="auth-sub">Join 4,000+ Scandinavian collectors</div>
+        <div class="form-row" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" placeholder="Erik">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" placeholder="Hansen">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" placeholder="Min. 8 characters">
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Country</label>
+          <select class="form-select">
+            <option>🇳🇴 Norway</option>
+            <option>🇸🇪 Sweden</option>
+            <option>🇩🇰 Denmark</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-full btn-lg" onclick="doLogin('signup')">Create Account →</button>
+        <div class="auth-switch">Already a member? <a onclick="showAuthCard('login')">Sign in →</a></div>
+      </div>
+      <div class="auth-card" id="forgotCard" style="display:none;">
+        <div class="auth-title">Reset password</div>
+        <div class="auth-sub">We'll send a reset link to your email</div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" placeholder="you@example.com">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="showToast('Reset link sent! Check your email 📧','success');showAuthCard('login')">Send Reset Link</button>
+        <div class="auth-switch"><a onclick="showAuthCard('login')">← Back to sign in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP (hidden until logged in) ===== -->
+<div id="mainApp" style="display:none;">
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark" onclick="navigate('home')">
+        <div class="logo-icon">S</div>
+        <div>
+          <div class="logo-text">Scandi<span>Dex</span></div>
+          <div class="logo-sub">Scandinavian TCG</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Market</div>
+        <button class="nav-item active" id="nav-home" onclick="navigate('home')"><span class="icon">🏠</span> Home</button>
+        <button class="nav-item" id="nav-browse" onclick="navigate('browse')"><span class="icon">🔍</span> Browse & Buy</button>
+        <button class="nav-item" id="nav-sell" onclick="navigate('sell')"><span class="icon">💰</span> Sell a Card</button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">My Account</div>
+        <button class="nav-item" id="nav-account" onclick="navigate('account')"><span class="icon">👤</span> My Profile</button>
+        <button class="nav-item" id="nav-cart" onclick="navigate('cart')">
+          <span class="icon">🛒</span> Cart
+          <span class="nav-badge red" id="cartBadgeSidebar" style="display:none;">0</span>
+        </button>
+        <button class="nav-item" id="nav-shipping" onclick="navigate('shipping')"><span class="icon">📦</span> Shipping</button>
+        <button class="nav-item" id="nav-notifs" onclick="navigate('notifs')">
+          <span class="icon">🔔</span> Notifications
+          <span class="nav-badge" id="notifBadge">4</span>
+        </button>
+        <button class="nav-item" id="nav-disputes" onclick="navigate('disputes')"><span class="icon">🛡</span> Disputes</button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Preferences</div>
+        <button class="nav-item" id="nav-settings" onclick="navigate('settings')"><span class="icon">⚙️</span> Settings</button>
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-snippet" onclick="navigate('account')">
+        <div class="user-avatar" id="sidebarAvatar">EH</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarName">Erik Hansen</div>
+          <div class="user-role">🇳🇴 Verified Seller</div>
+        </div>
+        <button class="logout-btn" onclick="logout(event)" title="Sign out">↩</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+
+    <!-- ======= HOME ======= -->
+    <div class="page active" id="page-home">
+      <div class="topbar">
+        <div class="topbar-title">Home</div>
+        <div class="topbar-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.4"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input placeholder="Search cards, sets, Pokémon..." id="homeSearch" oninput="homeSearchLive()" onkeydown="if(event.key==='Enter'){navigate('browse');setTimeout(()=>{document.getElementById('browseSearch').value=this.value;renderBrowse();},100)}">
+        </div>
+        <div class="topbar-actions">
+          <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+          <div class="cart-bubble icon-btn" onclick="navigate('cart')">
+            🛒
+            <div class="badge" id="cartBadgeTop">0</div>
+          </div>
+        </div>
+      </div>
+      <div class="content-wrap">
+        <div class="home-hero card">
+          <div class="home-hero-text">
+            <div class="home-hero-eyebrow"><div class="live-dot"></div>Live Marketplace</div>
+            <h1>The Scandinavian<br>Pokémon TCG Marketplace</h1>
+            <p>Buy and sell Pokémon cards across Norway, Sweden and Denmark. Local payments, PostNord shipping, buyer protection.</p>
+            <div class="hero-btns">
+              <button class="btn btn-primary btn-lg" onclick="navigate('browse')">Browse Cards →</button>
+              <button class="btn btn-secondary" onclick="navigate('sell')">Sell Your Cards</button>
+            </div>
+            <div class="hero-stats">
+              <div class="stat-item"><div class="stat-n" id="statListings">0</div><div class="stat-l">Listings</div></div>
+              <div class="stat-item"><div class="stat-n">3,800+</div><div class="stat-l">Traders</div></div>
+              <div class="stat-item"><div class="stat-n">3</div><div class="stat-l">Countries</div></div>
+            </div>
+          </div>
+          <div style="flex-shrink:0;display:flex;gap:10px;">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="background:linear-gradient(135deg,#1a0a3e,#3d1278);border-radius:14px;padding:14px;width:130px;border:1px solid rgba(255,255,255,0.1);">
+                <div style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Mewtwo PSA 9</div>
+                <div style="font-size:38px;text-align:center;margin-bottom:8px;">🧬</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffd166;font-weight:500;">NOK 2,400</div>
+              </div>
+              <div style="background:linear-gradient(135deg,#001520,#003d60);border-radius:14px;padding:14px;width:130px;border:1px solid rgba(255,255,255,0.1);">
+                <div style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Lugia SR · NM</div>
+                <div style="font-size:38px;text-align:center;margin-bottom:8px;">🌊</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffd166;font-weight:500;">NOK 1,800</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:22px;">
+              <div style="background:linear-gradient(135deg,#2d0800,#7a2c00);border-radius:14px;padding:14px;width:130px;border:1px solid rgba(255,255,255,0.1);">
+                <div style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Charizard ex · NM</div>
+                <div style="font-size:38px;text-align:center;margin-bottom:8px;">🔥</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ffd166;font-weight:500;">NOK 2,850</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ticker -->
+        <div class="ticker-container">
+          <div class="ticker-label">🔴 Live Sales</div>
+          <div class="ticker-track">
+            <div class="ticker-inner" id="tickerEl"></div>
+          </div>
+        </div>
+
+        <!-- Featured Listings -->
+        <div class="section-hdr">
+          <div><div class="section-title">Featured Listings</div><div class="section-sub">Freshly listed by verified sellers</div></div>
+          <button class="btn btn-secondary btn-sm" onclick="navigate('browse')">View all →</button>
+        </div>
+        <div class="grid-auto" id="homeGrid" style="margin-bottom:28px;"></div>
+
+        <!-- Flags row -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:20px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);">Ships to</div>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;color:var(--text2);">🇳🇴 Norway</div>
+            <div style="display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;color:var(--text2);">🇸🇪 Sweden</div>
+            <div style="display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;color:var(--text2);">🇩🇰 Denmark</div>
+          </div>
+          <div style="margin-left:auto;font-size:12px;color:var(--text3);font-weight:500;">Pay with NOK · SEK · DKK · EUR</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= BROWSE ======= -->
+    <div class="page" id="page-browse">
+      <div class="topbar">
+        <div class="topbar-title">Browse</div>
+        <div class="topbar-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.4"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input placeholder="Card name, set, Pokémon..." id="browseSearch" oninput="renderBrowse()">
+        </div>
+        <div class="topbar-actions">
+          <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn2">🌙</button>
+          <button class="icon-btn" onclick="toggleFilters()" id="filterToggleBtn" title="Filters">⚙</button>
+          <div class="cart-bubble icon-btn" onclick="navigate('cart')">🛒<div class="badge" id="cartBadgeTop2">0</div></div>
+        </div>
+      </div>
+      <div class="content-wrap">
+        <div class="browse-layout">
+          <aside class="filter-sidebar" id="filterSidebar">
+            <div class="section-hdr" style="margin-bottom:14px;">
+              <div style="font-size:14px;font-weight:700;">Filters</div>
+              <button class="btn btn-secondary btn-sm" onclick="resetFilters()">Reset</button>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-group-label">Set</div>
+              <select class="form-select" id="filterSet" onchange="renderBrowse()" style="font-size:12.5px;padding:8px 10px;">
+                <option value="">All Sets</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-group-label">Condition</div>
+              <div class="chips-row" id="condChips">
+                <button class="chip active" data-v="all" onclick="setFilter('cond',this)">Any</button>
+                <button class="chip" data-v="M" onclick="setFilter('cond',this)">M</button>
+                <button class="chip" data-v="NM" onclick="setFilter('cond',this)">NM</button>
+                <button class="chip" data-v="LP" onclick="setFilter('cond',this)">LP</button>
+                <button class="chip" data-v="MP" onclick="setFilter('cond',this)">MP</button>
+                <button class="chip" data-v="HP" onclick="setFilter('cond',this)">HP</button>
+                <button class="chip" data-v="DMG" onclick="setFilter('cond',this)">DMG</button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-group-label">Graded</div>
+              <div class="chips-row" id="gradedChips">
+                <button class="chip active" data-v="all" onclick="setFilter('graded',this)">All</button>
+                <button class="chip" data-v="ungraded" onclick="setFilter('graded',this)">Ungraded</button>
+                <button class="chip" data-v="PSA" onclick="setFilter('graded',this)">PSA</button>
+                <button class="chip" data-v="CGC" onclick="setFilter('graded',this)">CGC</button>
+                <button class="chip" data-v="BGS" onclick="setFilter('graded',this)">BGS</button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-group-label">Language</div>
+              <div class="chips-row" id="langChips">
+                <button class="chip active" data-v="all" onclick="setFilter('lang',this)">All</button>
+                <button class="chip" data-v="EN" onclick="setFilter('lang',this)">🇬🇧 EN</button>
+                <button class="chip" data-v="JA" onclick="setFilter('lang',this)">🇯🇵 JA</button>
+                <button class="chip" data-v="DE" onclick="setFilter('lang',this)">🇩🇪 DE</button>
+                <button class="chip" data-v="ZH" onclick="setFilter('lang',this)">🇨🇳 ZH</button>
+                <button class="chip" data-v="ES" onclick="setFilter('lang',this)">🇪🇸 ES</button>
+                <button class="chip" data-v="other" onclick="setFilter('lang',this)">Other</button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-group-label">Country</div>
+              <div class="chips-row" id="countryChips">
+                <button class="chip active" data-v="all" onclick="setFilter('country',this)">All Scandi</button>
+                <button class="chip" data-v="NO" onclick="setFilter('country',this)">🇳🇴 Norway</button>
+                <button class="chip" data-v="SE" onclick="setFilter('country',this)">🇸🇪 Sweden</button>
+                <button class="chip" data-v="DK" onclick="setFilter('country',this)">🇩🇰 Denmark</button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-group-label">Price Range</div>
+              <div class="price-inputs">
+                <input class="form-input" type="number" placeholder="Min" id="priceMin" oninput="renderBrowse()" style="padding:8px 10px;font-size:12.5px;">
+                <input class="form-input" type="number" placeholder="Max" id="priceMax" oninput="renderBrowse()" style="padding:8px 10px;font-size:12.5px;">
+              </div>
+            </div>
+          </aside>
+
+          <div>
+            <div class="browse-toolbar">
+              <div style="font-size:13px;color:var(--text3);flex:1;" id="browseCount">Loading...</div>
+              <select class="form-select" id="browseSort" onchange="renderBrowse()" style="width:auto;font-size:12.5px;padding:8px 12px;">
+                <option value="recent">Recently Listed</option>
+                <option value="low">Price: Low → High</option>
+                <option value="high">Price: High → Low</option>
+                <option value="rating">Top Rated</option>
+              </select>
+            </div>
+            <div class="grid-auto" id="browseGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= SELL ======= -->
+    <div class="page" id="page-sell">
+      <div class="topbar">
+        <div class="topbar-title">Sell a Card</div>
+        <div class="topbar-actions">
+          <button class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+        </div>
+      </div>
+      <div class="content-wrap" style="max-width:720px;">
+        <!-- Stepper -->
+        <div class="sell-stepper" id="sellStepper">
+          <div class="step active" id="step1"><div class="step-circle">1</div><div class="step-label">Photos</div></div>
+          <div class="step" id="step2"><div class="step-circle">2</div><div class="step-label">Details</div></div>
+          <div class="step" id="step3"><div class="step-circle">3</div><div class="step-label">Price</div></div>
+          <div class="step" id="step4"><div class="step-circle">4</div><div class="step-label">Shipping</div></div>
+        </div>
+
+        <!-- Step 1: Photos -->
+        <div class="sell-panel" id="sellStep1">
+          <div class="section-hdr" style="margin-bottom:16px;">
+            <div><div class="section-title">Add Photos</div><div class="section-sub">Front & back — good lighting helps sell faster</div></div>
+          </div>
+          <div class="photo-upload-area" onclick="fakeUpload()">
+            <div class="photo-upload-icon">📷</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Tap to upload photos</div>
+            <div style="font-size:12px;color:var(--text3);">JPG, PNG · max 10MB · Front & back recommended</div>
+          </div>
+          <div class="photo-preview" id="photoPreview" style="display:none;">
+            <div class="photo-thumb" id="pt1">📸</div>
+            <div class="photo-thumb" id="pt2" style="opacity:0.4;">+</div>
+            <div class="photo-thumb" id="pt3" style="opacity:0.4;">+</div>
+            <div class="photo-thumb" id="pt4" style="opacity:0.4;">+</div>
+          </div>
+          <div style="margin-top:20px;">
+            <button class="btn btn-primary btn-full btn-lg" onclick="goSellStep(2)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Details -->
+        <div class="sell-panel" id="sellStep2" style="display:none;">
+          <div class="section-title" style="margin-bottom:16px;">Card Details</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="form-group">
+              <label class="form-label">Card Name *</label>
+              <input class="form-input" id="sfName" placeholder="e.g. Charizard ex, Umbreon VMAX..." oninput="updatePricePreview()">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Set *</label>
+                <select class="form-select" id="sfSet"><option value="">Select Set…</option></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Card Number</label>
+                <input class="form-input" placeholder="e.g. 006/165">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Condition *</label>
+                <select class="form-select" id="sfCond" onchange="updatePricePreview()">
+                  <option value="">Select…</option>
+                  <option value="M">Mint (M)</option>
+                  <option value="NM">Near Mint (NM)</option>
+                  <option value="LP">Lightly Played (LP)</option>
+                  <option value="MP">Moderately Played (MP)</option>
+                  <option value="HP">Heavily Played (HP)</option>
+                  <option value="DMG">Damaged (DMG)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Graded?</label>
+                <select class="form-select" id="sfGraded" onchange="toggleGradedField()">
+                  <option value="no">Not Graded</option>
+                  <option value="PSA">PSA</option>
+                  <option value="CGC">CGC</option>
+                  <option value="BGS">BGS</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" id="gradeScoreGroup" style="display:none;">
+              <label class="form-label">Grade Score</label>
+              <input class="form-input" placeholder="e.g. 9, 9.5, 10">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Language</label>
+                <select class="form-select" id="sfLang">
+                  <option value="EN">🇬🇧 English</option>
+                  <option value="JA">🇯🇵 Japanese</option>
+                  <option value="DE">🇩🇪 German</option>
+                  <option value="ZH">🇨🇳 Chinese</option>
+                  <option value="ES">🇪🇸 Spanish</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ships From</label>
+                <select class="form-select" id="sfCountry">
+                  <option>🇳🇴 Norway</option>
+                  <option>🇸🇪 Sweden</option>
+                  <option>🇩🇰 Denmark</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description (optional)</label>
+              <textarea class="form-textarea" id="sfDesc" placeholder="Any notable details — centering, holo condition, if it comes sleeved…"></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:20px;">
+            <button class="btn btn-secondary" onclick="goSellStep(1)">← Back</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="goSellStep(3)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Price -->
+        <div class="sell-panel" id="sellStep3" style="display:none;">
+          <div class="section-title" style="margin-bottom:16px;">Set Your Price</div>
+          <div class="form-row" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label">Price *</label>
+              <input class="form-input" type="number" id="sfPrice" placeholder="0" oninput="updatePricePreview()" style="font-size:20px;font-family:'DM Mono',monospace;padding:12px 14px;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Currency</label>
+              <select class="form-select" id="sfCurrency" onchange="updatePricePreview()" style="font-size:16px;padding:12px 14px;">
+                <option>NOK</option><option>SEK</option><option>DKK</option><option>EUR</option>
+              </select>
+            </div>
+          </div>
+          <div class="price-breakdown" id="priceBreakdown">
+            <div class="pb-row"><span style="color:var(--text2);">Listing price</span><span id="pbPrice" style="font-family:'DM Mono',monospace;">—</span></div>
+            <div class="pb-row"><span style="color:var(--text2);">Platform fee (5%)</span><span id="pbFee" style="font-family:'DM Mono',monospace;color:var(--red);">—</span></div>
+            <div class="pb-row total"><span>Your payout</span><span class="pb-payout" id="pbPayout">—</span></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:20px;">
+            <button class="btn btn-secondary" onclick="goSellStep(2)">← Back</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="goSellStep(4)">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Shipping -->
+        <div class="sell-panel" id="sellStep4" style="display:none;">
+          <div class="section-title" style="margin-bottom:4px;">Shipping</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">ScandiDex uses PostNord. Label is generated automatically when sold.</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <span class="postnord-badge">📦 PostNord Integration</span>
+              <span style="font-size:11px;color:var(--green);font-weight:600;">✓ Auto-connected</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:var(--text2);">Letter (≤ 100g, cards)</span><span style="font-weight:600;">NOK 30–50</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:var(--text2);">Small parcel + tracking</span><span style="font-weight:600;">NOK 79–99</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:var(--text2);">Express 1-day</span><span style="font-weight:600;">NOK 149+</span></div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">Preferred Shipping Method</label>
+            <select class="form-select">
+              <option>PostNord Letter (tracking included) — NOK 49</option>
+              <option>PostNord Small Parcel + Tracking — NOK 89</option>
+              <option>PostNord Express — NOK 149</option>
+              <option>Local Pickup (Oslo / Stockholm / Copenhagen)</option>
+            </select>
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">When your card sells, you'll receive a pre-paid shipping label by email. Buyer is notified automatically with a tracking link.</div>
+          <div style="display:flex;gap:8px;margin-top:20px;">
+            <button class="btn btn-secondary" onclick="goSellStep(3)">← Back</button>
+            <button class="btn btn-primary btn-lg" style="flex:1;" onclick="submitListing()">🚀 Publish Listing</button>
+          </div>
+        </div>
+
+        <!-- Success -->
+        <div id="sellSuccess" style="display:none;">
+          <div style="background:rgba(6,214,160,0.07);border:1px solid rgba(6,214,160,0.2);border-radius:20px;padding:32px;text-align:center;">
+            <div style="font-size:48px;margin-bottom:12px;">✅</div>
+            <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--green);margin-bottom:8px;">Listing is live!</div>
+            <p id="sellSuccessMsg" style="font-size:14px;color:var(--text2);margin-bottom:20px;"></p>
+            <div style="display:flex;gap:10px;justify-content:center;">
+              <button class="btn btn-primary" onclick="navigate('browse')">View All Listings</button>
+              <button class="btn btn-secondary" onclick="resetSell()">List Another</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= CART ======= -->
+    <div class="page" id="page-cart">
+      <div class="topbar">
+        <div class="topbar-title">Cart</div>
+        <div class="topbar-actions">
+          <button class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+        </div>
+      </div>
+      <div class="content-wrap">
+        <div class="cart-layout" id="cartLayout">
+          <div>
+            <div id="cartItemsEl" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+          <div class="order-box" id="orderBox"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= ACCOUNT ======= -->
+    <div class="page" id="page-account">
+      <div class="topbar">
+        <div class="topbar-title">My Profile</div>
+        <div class="topbar-actions">
+          <button class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+        </div>
+      </div>
+      <div class="content-wrap">
+        <div class="profile-layout">
+          <div>
+            <div class="profile-card">
+              <div class="profile-avatar" id="profileAvatar">EH</div>
+              <div class="profile-name" id="profileName">Erik Hansen</div>
+              <div class="profile-handle">@erikhansen · 🇳🇴 Oslo</div>
+              <div class="verified-pill">✓ Verified Seller</div>
+              <div class="profile-stats">
+                <div class="ps-stat"><div class="ps-n" id="psSold">0</div><div class="ps-l">Sold</div></div>
+                <div class="ps-stat"><div class="ps-n" id="psListed">0</div><div class="ps-l">Listed</div></div>
+                <div class="ps-stat"><div class="ps-n">4.9</div><div class="ps-l">Rating</div></div>
+              </div>
+              <div class="trust-bar">
+                <div class="trust-title">Trust Score</div>
+                <div class="trust-row"><span>Fulfillment Rate</span><span class="val good">100%</span></div>
+                <div class="trust-row"><span>Response Time</span><span class="val good">&lt; 2h</span></div>
+                <div class="trust-row"><span>Disputes</span><span class="val good">0</span></div>
+                <div class="trust-row"><span>Member Since</span><span class="val">Mar 2022</span></div>
+              </div>
+              <div class="stars-row" style="justify-content:center;gap:6px;margin-bottom:12px;">
+                <div class="stars">★★★★★</div>
+                <div class="rating-num">4.9</div>
+                <div class="rating-count">(84 reviews)</div>
+              </div>
+              <button class="btn btn-secondary btn-full btn-sm" onclick="showAccountTab('settings')">⚙ Settings</button>
+            </div>
+          </div>
+          <div>
+            <div class="tabs-bar">
+              <button class="tab-btn active" id="atab-listings" onclick="showAccountTab('listings')">My Listings</button>
+              <button class="tab-btn" id="atab-purchases" onclick="showAccountTab('purchases')">Purchases</button>
+              <button class="tab-btn" id="atab-watchlist" onclick="showAccountTab('watchlist')">Watchlist</button>
+              <button class="tab-btn" id="atab-settings" onclick="showAccountTab('settings')">Settings</button>
+            </div>
+            <div id="accountContent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= SHIPPING ======= -->
+    <div class="page" id="page-shipping">
+      <div class="topbar">
+        <div class="topbar-title">Shipping</div>
+        <div class="topbar-actions">
+          <button class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+        </div>
+      </div>
+      <div class="content-wrap" style="max-width:800px;">
+        <div class="section-hdr" style="margin-bottom:16px;">
+          <div><div class="section-title">Your Shipments</div><div class="section-sub">Track outgoing and incoming orders</div></div>
+          <span class="postnord-badge">📦 PostNord Connected</span>
+        </div>
+        <div id="shippingList"></div>
+      </div>
+    </div>
+
+    <!-- ======= NOTIFICATIONS ======= -->
+    <div class="page" id="page-notifs">
+      <div class="topbar">
+        <div class="topbar-title">Notifications</div>
+        <div class="topbar-actions">
+          <button class="btn btn-secondary btn-sm" onclick="markAllRead()">Mark all read</button>
+          <button class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+        </div>
+      </div>
+      <div class="content-wrap" style="max-width:700px;padding-top:8px;">
+        <div id="notifList" style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;"></div>
+      </div>
+    </div>
+
+    <!-- ======= DISPUTES ======= -->
+    <div class="page" id="page-disputes">
+      <div class="topbar">
+        <div class="topbar-title">Disputes & Protection</div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary btn-sm" onclick="openDisputeModal()">+ Report Issue</button>
+          <button class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+        </div>
+      </div>
+      <div class="content-wrap" style="max-width:800px;">
+        <div style="background:rgba(6,214,160,0.07);border:1px solid rgba(6,214,160,0.2);border-radius:14px;padding:16px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;">
+          <div style="font-size:24px;">🛡</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:3px;">Buyer Protection Active</div>
+            <div style="font-size:13px;color:var(--text2);">All purchases on ScandiDex are covered. If your item doesn't arrive or is not as described, open a dispute within 14 days of delivery.</div>
+          </div>
+        </div>
+        <div class="section-hdr" style="margin-bottom:12px;">
+          <div class="section-title">Open Cases</div>
+        </div>
+        <div id="disputeList"></div>
+        <div class="section-hdr" style="margin-bottom:12px;margin-top:20px;">
+          <div class="section-title">Resolved Cases</div>
+        </div>
+        <div id="resolvedList"></div>
+      </div>
+    </div>
+
+    <!-- ======= SETTINGS ======= -->
+    <div class="page" id="page-settings">
+      <div class="topbar">
+        <div class="topbar-title">Settings</div>
+        <div class="topbar-actions">
+          <button class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+        </div>
+      </div>
+      <div class="content-wrap" style="max-width:680px;">
+        <div class="settings-section">
+          <div class="settings-section-title">🎨 Appearance</div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Dark Mode</div><div class="toggle-sub">Switch between light and dark themes</div></div>
+            <label class="toggle"><input type="checkbox" id="darkModeToggle" checked onchange="applyThemeFromToggle()"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">🌍 Language & Region</div>
+          <div class="form-row" style="margin-bottom:12px;">
+            <div class="form-group">
+              <label class="form-label">Interface Language</label>
+              <select class="form-select" id="settingsLang" onchange="changeLang(this.value)">
+                <option value="en">🇬🇧 English</option>
+                <option value="no">🇳🇴 Norsk</option>
+                <option value="sv">🇸🇪 Svenska</option>
+                <option value="da">🇩🇰 Dansk</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Default Currency</label>
+              <select class="form-select" id="settingsCurrency" onchange="setDefaultCurrency(this.value)">
+                <option value="NOK">NOK — Norwegian Krone</option>
+                <option value="SEK">SEK — Swedish Krona</option>
+                <option value="DKK">DKK — Danish Krone</option>
+                <option value="EUR">EUR — Euro</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">🔔 Notifications</div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Sale made</div><div class="toggle-sub">Get notified when your card sells</div></div>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Offer received</div><div class="toggle-sub">When a buyer sends an offer</div></div>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Card shipped</div><div class="toggle-sub">Tracking updates for your orders</div></div>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Price drop on watchlist</div><div class="toggle-sub">When a watched item gets cheaper</div></div>
+            <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">New listings match</div><div class="toggle-sub">When cards you're looking for are listed</div></div>
+            <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">💳 Payment Methods</div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">Preferred Payment</label>
+            <select class="form-select">
+              <option>Vipps (Norway)</option>
+              <option>Swish (Sweden)</option>
+              <option>MobilePay (Denmark)</option>
+              <option>PayPal</option>
+              <option>Bank Transfer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payout IBAN</label>
+            <input class="form-input" placeholder="NO ## #### #### #####" value="NO 93 8601 1117 947">
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">🔒 Account</div>
+          <div class="form-row" style="margin-bottom:12px;">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input class="form-input" id="settingsUsername" value="erikhansen">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input" type="email" value="erik@example.com">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+          <button class="btn btn-danger btn-sm" style="margin-left:10px;" onclick="logout()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div>
+
+<!-- Mobile bottom nav -->
+<div class="mobile-nav" id="mobileNav">
+  <button class="mob-nav-item active" id="mnav-home" onclick="navigate('home')"><span class="icon">🏠</span><span class="label">Home</span></button>
+  <button class="mob-nav-item" id="mnav-browse" onclick="navigate('browse')"><span class="icon">🔍</span><span class="label">Browse</span></button>
+  <button class="mob-nav-item" id="mnav-sell" onclick="navigate('sell')"><span class="icon">💰</span><span class="label">Sell</span></button>
+  <button class="mob-nav-item" id="mnav-cart" onclick="navigate('cart')"><span class="icon">🛒</span><span class="label">Cart</span></button>
+  <button class="mob-nav-item" id="mnav-account" onclick="navigate('account')"><span class="icon">👤</span><span class="label">Me</span></button>
+</div>
+
+<!-- Dispute Modal -->
+<div class="modal-overlay" id="disputeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Report an Issue</div>
+      <button class="modal-close" onclick="closeModal('disputeModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Order / Card</label>
+        <select class="form-select">
+          <option>Charizard ex — Order #4892</option>
+          <option>Pikachu Illustrator — Order #4876</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Issue Type</label>
+        <select class="form-select">
+          <option>Item not received</option>
+          <option>Item not as described</option>
+          <option>Wrong item sent</option>
+          <option>Damaged in transit</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" placeholder="Describe the issue in detail…"></textarea>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="submitDispute()">Submit Dispute</button>
+    </div>
+  </div>
+</div>
+
+<!-- Card Detail Modal -->
+<div class="modal-overlay" id="cardModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="cmTitle"></div>
+      <button class="modal-close" onclick="closeModal('cardModal')">✕</button>
+    </div>
+    <div style="text-align:center;font-size:72px;padding:12px 0;background:var(--surface2);border-radius:14px;margin-bottom:16px;" id="cmEmoji"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;" id="cmDetails"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:500;text-align:center;color:var(--gold);margin-bottom:16px;" id="cmPrice"></div>
+    <div style="background:var(--surface2);border-radius:12px;padding:12px;margin-bottom:16px;" id="cmTrust"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" style="flex:1;" id="cmAddBtn" onclick="addFromModal()">Add to Cart</button>
+      <button class="btn btn-secondary" onclick="showToast('Message sent to seller 💬','success');closeModal('cardModal')">Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast stack -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const POKEMON_SETS = [
+  'Base Set','Jungle','Fossil','Team Rocket','Neo Genesis','Neo Discovery','Neo Revelation','Neo Destiny',
+  'EX Ruby & Sapphire','EX Dragon','EX Team Magma vs Team Aqua','EX FireRed & LeafGreen',
+  'EX Emerald','EX Holon Phantoms','EX Dragon Frontiers','EX Power Keepers',
+  'Diamond & Pearl','Mysterious Treasures','Secret Wonders','Great Encounters',
+  'Majestic Dawn','Legends Awakened','Stormfront',
+  'Platinum','Rising Rivals','Supreme Victors','Arceus',
+  'HeartGold SoulSilver','Unleashed','Undaunted','Triumphant','Call of Legends',
+  'Black & White','Emerging Powers','Noble Victories','Next Destinies',
+  'Dark Explorers','Dragons Exalted','Boundaries Crossed','Plasma Storm','Plasma Freeze','Plasma Blast','Legendary Treasures',
+  'XY Base','Flashfire','Furious Fists','Phantom Forces','Primal Clash','Roaring Skies','Ancient Origins',
+  'BREAKthrough','BREAKpoint','Fates Collide','Steam Siege','Evolutions',
+  'Sun & Moon','Guardians Rising','Burning Shadows','Crimson Invasion','Ultra Prism',
+  'Forbidden Light','Celestial Storm','Lost Thunder','Team Up','Unbroken Bonds',
+  'Unified Minds','Cosmic Eclipse','Sword & Shield','Rebel Clash','Darkness Ablaze',
+  'Vivid Voltage','Battle Styles','Chilling Reign','Evolving Skies','Fusion Strike',
+  'Celebrations','Brilliant Stars','Astral Radiance','Lost Origin','Silver Tempest','Crown Zenith',
+  'Scarlet & Violet','Paldea Evolved','Obsidian Flames','151',
+  'Paradox Rift','Paldean Fates','Temporal Forces','Twilight Masquerade',
+  'Shrouded Fable','Stellar Crown','Surging Sparks','Prismatic Evolutions',
+  'Journey Together','Other'
+];
+
+const CARDS = [];
+
+// ============================================================
+// STATE
+// ============================================================
+let cart = [];
+let currentUser = null;
+let filterState = { cond:'all', graded:'all', lang:'all', country:'all' };
+let currentModalCard = null;
+let defaultCurrency = 'NOK';
+let sellStep = 1;
+let photoUploaded = false;
+let myListings = [];
+let myPurchases = [
+  { name:'Charizard ex — 199/165', set:'Obsidian Flames', date:'15 Apr 2025', price:'NOK 2,200', status:'Delivered', emoji:'🔥' },
+  { name:'Pikachu ex SAR', set:'Scarlet & Violet 151', date:'3 Mar 2025', price:'SEK 1,890', status:'Delivered', emoji:'⚡' },
+  { name:'Miraidon ex', set:'Scarlet & Violet', date:'18 Feb 2025', price:'SEK 480', status:'Delivered', emoji:'⚡' },
+];
+let watchlist = [];
+let notifications = [
+  { icon:'💰', title:'Sale complete', desc:'Your Umbreon VMAX sold for NOK 3,400', time:'2m ago', unread:true },
+  { icon:'📦', title:'Item shipped', desc:'Charizard ex from NordicCards is on its way — PostNord track: SE123456789', time:'1h ago', unread:true },
+  { icon:'🔔', title:'Price drop on watchlist', desc:'Lugia Secret Rare dropped to NOK 1,400 (was NOK 1,800)', time:'3h ago', unread:true },
+  { icon:'💬', title:'New message', desc:'GothenburgCollects: "Is this still available?"', time:'5h ago', unread:true },
+  { icon:'⭐', title:'New review', desc:'KøbenhavnCards left you a 5-star review', time:'2d ago', unread:false },
+  { icon:'📦', title:'Order delivered', desc:'Your Pikachu ex SAR has been delivered', time:'3d ago', unread:false },
+];
+let shipments = [
+  { id:'SX4892', name:'Umbreon VMAX → Jonas Berg (Stockholm)', status:'In Transit', track:'SE123456001', date:'Apr 24', events:[
+    { done:true, event:'Label created', time:'Apr 24, 10:12' },
+    { done:true, event:'Picked up at PostNord', time:'Apr 24, 14:35' },
+    { done:true, event:'Departed Oslo sorting facility', time:'Apr 25, 03:20' },
+    { done:false, event:'Arrived at Stockholm facility', time:'Expected Apr 27' },
+    { done:false, event:'Out for delivery', time:'' },
+  ], open:false },
+  { id:'RX4876', name:'Gardevoir ex SAR → Marta K. (Copenhagen)', status:'Delivered', track:'DK887002341', date:'Apr 19', events:[
+    { done:true, event:'Label created', time:'Apr 18, 09:00' },
+    { done:true, event:'Picked up at PostNord', time:'Apr 18, 13:10' },
+    { done:true, event:'Departed Oslo', time:'Apr 18, 22:00' },
+    { done:true, event:'Arrived Copenhagen', time:'Apr 19, 08:30' },
+    { done:true, event:'Delivered', time:'Apr 19, 14:02' },
+  ], open:false },
+];
+let disputes = [
+  { id:'#D-441', name:'Pikachu ex SAR', issue:'Not as described — centering worse than photos', status:'open', date:'Apr 22', msg:'Buyer reports card centering is significantly off compared to listing photos. Awaiting seller response.' },
+];
+let resolvedDisputes = [
+  { id:'#D-398', name:'Charizard Base Set', issue:'Item not received', status:'resolved', date:'Mar 10', msg:'Resolved: Seller reshipped item. Buyer confirmed receipt.' },
+];
+
+// ============================================================
+// AUTH
+// ============================================================
+function showAuthCard(which) {
+  document.getElementById('loginCard').style.display = which === 'login' ? '' : 'none';
+  document.getElementById('signupCard').style.display = which === 'signup' ? '' : 'none';
+  document.getElementById('forgotCard').style.display = which === 'forgot' ? '' : 'none';
+}
+function doLogin(method) {
+  const email = document.getElementById('loginEmail')?.value;
+  if(method === 'email' && !email) { showToast('Please enter your email','error'); return; }
+  currentUser = { name: 'Erik Hansen', initials: 'EH', country: 'NO' };
+  document.getElementById('loginModal').style.display = 'none';
+  document.getElementById('mainApp').style.display = '';
+  document.getElementById('mobileNav').style.display = 'flex';
+  initApp();
+  showToast('Welcome back, Erik! 👋','success');
+}
+function logout(e) {
+  if(e) e.stopPropagation();
+  currentUser = null;
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginModal').style.display = '';
+  document.getElementById('mobileNav').style.display = 'none';
+  showAuthCard('login');
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.mob-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const ni = document.getElementById('nav-' + page);
+  if(ni) ni.classList.add('active');
+  const mi = document.getElementById('mnav-' + page);
+  if(mi) mi.classList.add('active');
+  document.getElementById('mainContent').scrollTo(0, 0);
+  if(page === 'home') renderHome();
+  if(page === 'browse') renderBrowse();
+  if(page === 'cart') renderCart();
+  if(page === 'account') { renderAccountTab('listings'); updateProfileStats(); }
+  if(page === 'shipping') renderShipping();
+  if(page === 'notifs') renderNotifs();
+  if(page === 'disputes') renderDisputes();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function initApp() {
+  populateSets();
+  buildTicker();
+  renderHome();
+  animateCounter('statListings', 11842);
+  updateCartUI();
+}
+
+function populateSets() {
+  ['filterSet','sfSet'].forEach(id => {
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    sel.innerHTML = '<option value="">All Sets</option>';
+    POKEMON_SETS.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      sel.appendChild(o);
+    });
+  });
+}
+
+// ============================================================
+// TICKER
+// ============================================================
+function buildTicker() {
+  const items = [];
+  const el = document.getElementById('tickerEl');
+  if(!el) return;
+  el.innerHTML = '';
+}
+
+// ============================================================
+// HOME RENDER
+// ============================================================
+function renderHome() {
+  const grid = document.getElementById('homeGrid');
+  if(!grid) return;
+  grid.innerHTML = '<div class="empty-state"><div class="es-icon">🔍</div><div class="es-title">No listings yet</div><div class="es-sub">Be the first to list a card!</div><button class="btn btn-primary" style="margin-top:12px;" onclick="navigate(\'sell\')">List a Card →</button></div>';
+}
+
+function homeSearchLive() {
+  // just navigation hint
+}
+
+// ============================================================
+// BROWSE
+// ============================================================
+function renderBrowse() {
+  const search = (document.getElementById('browseSearch')?.value || '').toLowerCase();
+  const sort = document.getElementById('browseSort')?.value || 'recent';
+  const setFilter = document.getElementById('filterSet')?.value || '';
+  const pMin = parseFloat(document.getElementById('priceMin')?.value) || 0;
+  const pMax = parseFloat(document.getElementById('priceMax')?.value) || Infinity;
+  let res = CARDS.filter(c => {
+    const ms = !search || c.name.toLowerCase().includes(search) || c.set.toLowerCase().includes(search) || c.seller.toLowerCase().includes(search);
+    const mSet = !setFilter || c.set === setFilter;
+    const mCond = filterState.cond === 'all' || c.cond === filterState.cond;
+    const mGraded = filterState.graded === 'all' || (filterState.graded === 'ungraded' ? !c.graded : c.graded === filterState.graded);
+    const mLang = filterState.lang === 'all' || c.lang === filterState.lang;
+    const mCountry = filterState.country === 'all' || c.country === filterState.country;
+    const mPrice = c.price >= pMin && c.price <= pMax;
+    return ms && mSet && mCond && mGraded && mLang && mCountry && mPrice;
+  });
+  if(sort === 'low') res.sort((a,b) => a.price - b.price);
+  else if(sort === 'high') res.sort((a,b) => b.price - a.price);
+  else if(sort === 'rating') res.sort((a,b) => b.rating - a.rating);
+  const cnt = document.getElementById('browseCount');
+  if(cnt) cnt.textContent = `${res.length} listing${res.length !== 1 ? 's' : ''}${search ? ' for "' + search + '"' : ''}`;
+  const grid = document.getElementById('browseGrid');
+  if(!grid) return;
+  if(res.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="es-icon">${search ? '🔍' : '📦'}</div><div class="es-title">${search ? 'No results for "' + search + '"' : 'No listings yet'}</div><div class="es-sub">${search ? 'Try different keywords or clear filters' : 'Cards listed here will appear here'}</div>${!search ? '<button class="btn btn-primary" style="margin-top:12px;" onclick="navigate(\'sell\')">Be the first to sell →</button>' : ''}</div>`;
+  } else {
+    grid.innerHTML = res.map(c => listingCardHTML(c)).join('');
+  }
+}
+
+function listingCardHTML(c) {
+  const inCart = cart.some(x => x.id === c.id);
+  return `<div class="listing-card" onclick="openCardModal(${c.id})">
+    <div class="lc-img" style="background:${c.bg}">${c.emoji}
+      <div class="lc-badge fc-badge cond-${c.cond.replace(/[^A-Z]/g,'')}" style="position:absolute;top:8px;right:8px;">${c.cond}</div>
+    </div>
+    <div class="lc-body">
+      <div class="lc-set-row"><div class="lc-set">${c.set}</div><div class="lc-flag">${c.flag}</div></div>
+      <div class="lc-name">${c.name}</div>
+      <div class="lc-price">${c.currency || defaultCurrency} ${c.price.toLocaleString()}</div>
+      <div class="lc-seller"><div class="lc-trust"><span class="trust-score">★ ${c.rating}</span> ${c.seller}</div></div>
+    </div>
+  </div>`;
+}
+
+function setFilter(type, el) {
+  const group = el.closest('.chips-row');
+  group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterState[type] = el.dataset.v;
+  renderBrowse();
+}
+function resetFilters() {
+  filterState = { cond:'all', graded:'all', lang:'all', country:'all' };
+  document.querySelectorAll('.chips-row .chip').forEach(c => { c.classList.toggle('active', c.dataset.v === 'all'); });
+  document.getElementById('priceMin').value = '';
+  document.getElementById('priceMax').value = '';
+  document.getElementById('filterSet').value = '';
+  renderBrowse();
+}
+function toggleFilters() {
+  document.getElementById('filterSidebar').classList.toggle('open');
+}
+
+// ============================================================
+// CARD MODAL
+// ============================================================
+function openCardModal(id) {
+  const c = CARDS.find(x => x.id === id);
+  if(!c) return;
+  currentModalCard = c;
+  document.getElementById('cmTitle').textContent = c.name;
+  document.getElementById('cmEmoji').textContent = c.emoji;
+  document.getElementById('cmPrice').textContent = (c.currency || defaultCurrency) + ' ' + c.price.toLocaleString();
+  const inCart = cart.some(x => x.id === c.id);
+  const btn = document.getElementById('cmAddBtn');
+  btn.textContent = inCart ? '✓ In Cart' : 'Add to Cart';
+  btn.disabled = inCart;
+  document.getElementById('cmDetails').innerHTML = `
+    <div style="background:var(--surface2);border-radius:10px;padding:10px 12px;">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:600;">Condition</div>
+      <div style="font-size:14px;font-weight:700;"><span class="cond-badge cond-${c.cond}">${c.cond}</span></div>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:10px 12px;">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:600;">Set</div>
+      <div style="font-size:13px;font-weight:700;">${c.set}</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:10px 12px;">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:600;">Ships From</div>
+      <div style="font-size:13px;font-weight:700;">${c.flag} ${c.country}</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:10px 12px;">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:600;">Language</div>
+      <div style="font-size:13px;font-weight:700;">${c.langDisplay || 'EN'}</div>
+    </div>
+  `;
+  document.getElementById('cmTrust').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);">${c.seller}</div>
+      <div class="stars-row"><span class="stars">★★★★★</span><span class="rating-num" style="margin-left:4px;">${c.rating}</span></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:var(--green);font-weight:600;">✓ Verified</span>
+      <span style="font-size:11px;color:var(--text3);">100% fulfillment</span>
+      <span style="font-size:11px;color:var(--text3);">Ships 1–2 days</span>
+    </div>
+  `;
+  document.getElementById('cardModal').classList.add('open');
+}
+function addFromModal() {
+  if(!currentModalCard) return;
+  addToCart(currentModalCard.id);
+  closeModal('cardModal');
+}
+
+// ============================================================
+// CART
+// ============================================================
+function addToCart(id) {
+  const c = CARDS.find(x => x.id === id);
+  if(!c) return;
+  if(cart.some(x => x.id === id)) { showToast('Already in cart'); return; }
+  cart.push({...c});
+  updateCartUI();
+  showToast('Added: ' + c.name + ' 🛒', 'success');
+}
+function removeFromCart(id) {
+  cart = cart.filter(x => x.id !== id);
+  updateCartUI();
+  renderCart();
+}
+function updateCartUI() {
+  const n = cart.length;
+  ['cartBadgeTop','cartBadgeTop2'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) { el.textContent = n; el.classList.toggle('show', n > 0); }
+  });
+  ['cartBadgeSidebar'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) { el.textContent = n; el.style.display = n > 0 ? '' : 'none'; }
+  });
+}
+const FX = { NOK:1, SEK:0.95, DKK:0.67, EUR:0.087 };
+const FX_TO_NOK = { NOK:1, SEK:1.05, DKK:1.49, EUR:11.5 };
+function toNOK(price, currency) { return price * (FX_TO_NOK[currency] || 1); }
+function fromNOK(nok, to) { return nok * (FX[to] || 1); }
+
+function renderCart() {
+  const ci = document.getElementById('cartItemsEl');
+  const ob = document.getElementById('orderBox');
+  if(!ci || !ob) return;
+  const curr = defaultCurrency;
+  if(cart.length === 0) {
+    ci.innerHTML = `<div class="empty-state"><div class="es-icon">🛒</div><div class="es-title">Your cart is empty</div><div class="es-sub">Browse listings and add cards to get started.</div><button class="btn btn-primary" style="margin-top:12px;" onclick="navigate('browse')">Browse Cards →</button></div>`;
+    ob.innerHTML = `<div class="ob-title">Order Summary</div><div class="ob-row muted"><span>No items yet</span><span>—</span></div>`;
+    return;
+  }
+  ci.innerHTML = cart.map(c => {
+    const disp = fromNOK(toNOK(c.price, c.currency || 'NOK'), curr);
+    return `<div class="cart-item-card">
+      <div class="ci-img" style="background:${c.bg}">${c.emoji}</div>
+      <div class="ci-info">
+        <div class="ci-name">${c.name}</div>
+        <div class="ci-set">${c.set}</div>
+        <div class="ci-tags"><span class="cond-badge cond-${c.cond}">${c.cond}</span><span style="font-size:12px;">${c.flag}</span></div>
+      </div>
+      <div class="ci-price">${curr} ${Math.round(disp).toLocaleString()}</div>
+      <button class="ci-remove" onclick="removeFromCart(${c.id})">✕</button>
+    </div>`;
+  }).join('');
+  const subNOK = cart.reduce((s,c) => s + toNOK(c.price, c.currency || 'NOK'), 0);
+  const shipNOK = 79 * cart.length;
+  const totNOK = subNOK + shipNOK;
+  const sub = fromNOK(subNOK, curr); const ship = fromNOK(shipNOK, curr); const tot = fromNOK(totNOK, curr);
+  ob.innerHTML = `
+    <div class="ob-title">Order Summary</div>
+    <div class="ob-row muted"><span>Subtotal (${cart.length} item${cart.length>1?'s':''})</span><span>${curr} ${Math.round(sub).toLocaleString()}</span></div>
+    <div class="ob-row muted"><span>Shipping (PostNord)</span><span>${curr} ${Math.round(ship).toLocaleString()}</span></div>
+    <div class="ob-row muted"><span>Buyer Protection</span><span style="color:var(--green);">Free</span></div>
+    <div class="ob-row total"><span>Total</span><span>${curr} ${Math.round(tot).toLocaleString()}</span></div>
+    <div style="margin:12px 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);">Pay with</div>
+    <div class="payment-badges">
+      <span class="pay-badge active">Vipps</span><span class="pay-badge">Swish</span><span class="pay-badge">MobilePay</span><span class="pay-badge">PayPal</span><span class="pay-badge">Card</span>
+    </div>
+    <button class="btn btn-primary btn-full btn-lg" style="margin-top:8px;" onclick="checkout()">Proceed to Checkout →</button>
+    <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:10px;">🔒 Secure checkout · Buyer Protection on all orders</div>
+  `;
+}
+function checkout() {
+  if(cart.length === 0) return;
+  cart.forEach(c => myPurchases.unshift({ name:c.name, set:c.set, date:'Just now', price:`${c.currency || 'NOK'} ${c.price.toLocaleString()}`, status:'Processing', emoji:c.emoji }));
+  cart = [];
+  updateCartUI();
+  renderCart();
+  showToast('🎉 Order placed! Check Shipping for tracking.', 'success');
+  notifications.unshift({ icon:'🎉', title:'Order confirmed!', desc:'Your order is being processed.', time:'Just now', unread:true });
+  const nb = document.getElementById('notifBadge');
+  if(nb) nb.textContent = notifications.filter(n => n.unread).length;
+}
+
+// ============================================================
+// SELL
+// ============================================================
+function goSellStep(step) {
+  for(let i=1;i<=4;i++) {
+    const el = document.getElementById('sellStep'+i);
+    if(el) el.style.display = i === step ? '' : 'none';
+  }
+  for(let i=1;i<=4;i++) {
+    const s = document.getElementById('step'+i);
+    if(s) { s.classList.remove('active','done'); if(i < step) s.classList.add('done'); else if(i === step) s.classList.add('active'); }
+  }
+  sellStep = step;
+}
+function fakeUpload() {
+  document.getElementById('photoPreview').style.display = 'grid';
+  document.getElementById('pt1').textContent = '🃏';
+  photoUploaded = true;
+  showToast('Photo added! 📸', 'success');
+}
+function toggleGradedField() {
+  const v = document.getElementById('sfGraded').value;
+  document.getElementById('gradeScoreGroup').style.display = v !== 'no' ? '' : 'none';
+}
+function updatePricePreview() {
+  const price = parseFloat(document.getElementById('sfPrice')?.value) || 0;
+  const curr = document.getElementById('sfCurrency')?.value || 'NOK';
+  const fee = Math.round(price * 0.05);
+  const payout = price - fee;
+  const pb = document.getElementById('pbPrice'); if(pb) pb.textContent = price > 0 ? `${curr} ${price.toLocaleString()}` : '—';
+  const pf = document.getElementById('pbFee'); if(pf) pf.textContent = price > 0 ? `-${curr} ${fee.toLocaleString()}` : '—';
+  const pp = document.getElementById('pbPayout'); if(pp) pp.textContent = price > 0 ? `${curr} ${payout.toLocaleString()}` : '—';
+}
+function submitListing() {
+  const name = document.getElementById('sfName')?.value?.trim();
+  const set = document.getElementById('sfSet')?.value;
+  const cond = document.getElementById('sfCond')?.value;
+  const price = parseFloat(document.getElementById('sfPrice')?.value);
+  if(!name || !set || !cond || !price || price <= 0) { showToast('Please fill all required fields ⚠️','error'); return; }
+  const curr = document.getElementById('sfCurrency')?.value || 'NOK';
+  const countryRaw = document.getElementById('sfCountry')?.value || '🇳🇴 Norway';
+  const cMap = {'🇳🇴 Norway':['NO','🇳🇴'],'🇸🇪 Sweden':['SE','🇸🇪'],'🇩🇰 Denmark':['DK','🇩🇰']};
+  const [cCode, cFlag] = cMap[countryRaw] || ['NO','🇳🇴'];
+  const langVal = document.getElementById('sfLang')?.value || 'EN';
+  const langDisplay = {EN:'🇬🇧 English',JA:'🇯🇵 Japanese',DE:'🇩🇪 German',ZH:'🇨🇳 Chinese',ES:'🇪🇸 Spanish',other:'Other'}[langVal] || 'EN';
+  const graded = document.getElementById('sfGraded')?.value;
+  const condBadge = graded !== 'no' ? graded : cond;
+  const newCard = {
+    id: Date.now(), name, set, emoji:'🃏',
+    cond: condBadge, graded: graded !== 'no' ? graded : null,
+    lang: langVal, langDisplay,
+    price, currency: curr,
+    country: cCode, flag: cFlag,
+    seller: 'Erik (You)', rating: 5.0,
+    cat: 'modern', bg: 'linear-gradient(135deg,#0d1a2e,#1a3a5c)',
+  };
+  CARDS.unshift(newCard);
+  myListings.unshift({...newCard, status:'active'});
+  for(let i=1;i<=4;i++) { const el=document.getElementById('sellStep'+i); if(el) el.style.display='none'; }
+  document.getElementById('sellStepper').style.display = 'none';
+  document.getElementById('sellSuccess').style.display = '';
+  document.getElementById('sellSuccessMsg').textContent = `"${name}" from ${set} is now live for ${curr} ${price.toLocaleString()}.`;
+  showToast('Listing published! 🚀','success');
+  updateProfileStats();
+}
+function resetSell() {
+  document.getElementById('sellStepper').style.display = 'flex';
+  document.getElementById('sellSuccess').style.display = 'none';
+  document.getElementById('sfName').value = '';
+  document.getElementById('sfSet').value = '';
+  document.getElementById('sfCond').value = '';
+  document.getElementById('sfPrice').value = '';
+  document.getElementById('sfDesc').value = '';
+  document.getElementById('photoPreview').style.display = 'none';
+  updatePricePreview();
+  goSellStep(1);
+}
+
+// ============================================================
+// ACCOUNT / PROFILE
+// ============================================================
+function updateProfileStats() {
+  const sold = myListings.filter(l => l.status === 'sold').length;
+  const listed = myListings.filter(l => l.status === 'active').length;
+  const psSold = document.getElementById('psSold'); if(psSold) psSold.textContent = sold;
+  const psListed = document.getElementById('psListed'); if(psListed) psListed.textContent = listed;
+  const totalSold = document.getElementById('totalSold'); if(totalSold) totalSold.textContent = sold;
+}
+function showAccountTab(tab) {
+  navigate('account');
+  renderAccountTab(tab);
+}
+function renderAccountTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  const el = document.getElementById('atab-'+tab);
+  if(el) el.classList.add('active');
+  const ac = document.getElementById('accountContent');
+  if(!ac) return;
+  if(tab === 'listings') {
+    if(myListings.length === 0) {
+      ac.innerHTML = `<div class="empty-state"><div class="es-icon">📋</div><div class="es-title">No listings yet</div><div class="es-sub">List your first card to start selling!</div><button class="btn btn-primary" style="margin-top:12px;" onclick="navigate('sell')">Sell a Card →</button></div>`;
+      return;
+    }
+    ac.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:13px;color:var(--text3);">${myListings.length} listings</div><button class="btn btn-primary btn-sm" onclick="navigate('sell')">+ New Listing</button></div>` +
+      myListings.map(l => `<div class="listing-row">
+        <div class="lr-img" style="background:${l.bg}">${l.emoji}</div>
+        <div class="lr-info"><div class="lr-name">${l.name}</div><div class="lr-set">${l.set}</div><div class="lr-tags"><span class="cond-badge cond-${l.cond}">${l.cond}</span></div></div>
+        <div class="lr-right"><div class="lr-price">${l.currency || 'NOK'} ${l.price.toLocaleString()}</div><div class="status-pill ${l.status==='active'?'sp-active':l.status==='sold'?'sp-sold':'sp-pending'}">${l.status}</div></div>
+      </div>`).join('');
+  } else if(tab === 'purchases') {
+    if(myPurchases.length === 0) {
+      ac.innerHTML = `<div class="empty-state"><div class="es-icon">🛒</div><div class="es-title">No purchases yet</div><div class="es-sub">Your order history will appear here.</div></div>`;
+      return;
+    }
+    ac.innerHTML = myPurchases.map(p => `<div class="purchase-row">
+      <div><div class="pr-name">${p.emoji ? p.emoji+' ' : ''}${p.name}</div><div class="pr-date">${p.date}</div></div>
+      <div><div class="pr-price">${p.price}</div><div class="pr-status ${p.status==='Delivered'?'delivered':'in-transit'}">${p.status}</div></div>
+    </div>`).join('');
+  } else if(tab === 'watchlist') {
+    ac.innerHTML = `<div class="empty-state"><div class="es-icon">👁</div><div class="es-title">Watchlist is empty</div><div class="es-sub">Heart cards in Browse to track their price.</div><button class="btn btn-secondary" style="margin-top:12px;" onclick="navigate('browse')">Browse Cards</button></div>`;
+  } else if(tab === 'settings') {
+    navigate('settings');
+  }
+}
+
+// ============================================================
+// SHIPPING
+// ============================================================
+function renderShipping() {
+  const el = document.getElementById('shippingList');
+  if(!el) return;
+  if(shipments.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="es-icon">📦</div><div class="es-title">No active shipments</div><div class="es-sub">When you sell a card, PostNord labels appear here.</div></div>`;
+    return;
+  }
+  el.innerHTML = shipments.map((s,i) => `
+    <div class="shipping-card">
+      <div class="shipping-order" onclick="toggleShipment(${i})">
+        <div class="so-left">
+          <div class="so-name">${s.name}</div>
+          <div class="so-detail">Sold ${s.date}</div>
+        </div>
+        <div class="so-right">
+          <div style="font-size:13px;font-weight:600;color:${s.status==='Delivered'?'var(--green)':'var(--accent2)'};">${s.status}</div>
+          <div class="track-id">${s.track}</div>
+        </div>
+      </div>
+      <div class="tracking-timeline ${s.open?'open':''}" id="shipTL${i}">
+        ${s.events.map(e => `<div class="tl-item">
+          <div class="tl-dot ${e.done?'done':''}">${e.done?'✓':''}</div>
+          <div class="tl-content"><div class="tl-event">${e.event}</div><div class="tl-time">${e.time}</div></div>
+        </div>`).join('')}
+        <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="showToast('Opening PostNord tracking…')">View on PostNord ↗</button>
+      </div>
+    </div>
+  `).join('');
+}
+function toggleShipment(i) {
+  shipments[i].open = !shipments[i].open;
+  renderShipping();
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function renderNotifs() {
+  const el = document.getElementById('notifList');
+  if(!el) return;
+  el.innerHTML = notifications.map((n,i) => `
+    <div class="notif-item ${n.unread?'unread':''}" onclick="markRead(${i})">
+      <div class="notif-icon">${n.icon}</div>
+      <div class="notif-body"><div class="notif-title">${n.title}</div><div class="notif-desc">${n.desc}</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+        <div class="notif-time">${n.time}</div>
+        ${n.unread ? '<div class="unread-dot"></div>' : ''}
+      </div>
+    </div>
+  `).join('');
+}
+function markRead(i) { notifications[i].unread = false; updateNotifBadge(); renderNotifs(); }
+function markAllRead() { notifications.forEach(n => n.unread = false); updateNotifBadge(); renderNotifs(); showToast('All caught up ✓'); }
+function updateNotifBadge() {
+  const n = notifications.filter(n => n.unread).length;
+  const el = document.getElementById('notifBadge');
+  if(el) { el.textContent = n; el.style.display = n > 0 ? '' : 'none'; }
+}
+
+// ============================================================
+// DISPUTES
+// ============================================================
+function renderDisputes() {
+  const el = document.getElementById('disputeList');
+  const rel = document.getElementById('resolvedList');
+  if(el) {
+    if(disputes.length === 0) {
+      el.innerHTML = `<div class="empty-state"><div class="es-icon">✅</div><div class="es-title">No open disputes</div><div class="es-sub">All your transactions are in good standing.</div></div>`;
+    } else {
+      el.innerHTML = disputes.map(d => `<div class="dispute-card">
+        <div class="dispute-header"><div style="font-size:14px;font-weight:700;">${d.name}</div><span class="dispute-status ds-${d.status}">${d.status.charAt(0).toUpperCase()+d.status.slice(1)}</span></div>
+        <div class="dispute-id">${d.id} · Opened ${d.date}</div>
+        <div class="dispute-msg" style="margin-top:8px;">${d.msg}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-secondary btn-sm" onclick="showToast('Support contacted 📧')">Contact Support</button><button class="btn btn-success btn-sm" onclick="resolveDispute('${d.id}')">Mark Resolved</button></div>
+      </div>`).join('');
+    }
+  }
+  if(rel) {
+    if(resolvedDisputes.length === 0) {
+      rel.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:12px 0;">No resolved cases.</div>`;
+    } else {
+      rel.innerHTML = resolvedDisputes.map(d => `<div class="dispute-card" style="opacity:0.7;">
+        <div class="dispute-header"><div style="font-size:14px;font-weight:700;">${d.name}</div><span class="dispute-status ds-resolved">Resolved</span></div>
+        <div class="dispute-id">${d.id} · ${d.date}</div>
+        <div class="dispute-msg" style="margin-top:8px;">${d.msg}</div>
+      </div>`).join('');
+    }
+  }
+}
+function openDisputeModal() { document.getElementById('disputeModal').classList.add('open'); }
+function submitDispute() {
+  closeModal('disputeModal');
+  showToast('Dispute submitted. We\'ll respond within 24h 🛡','success');
+}
+function resolveDispute(id) {
+  const idx = disputes.findIndex(d => d.id === id);
+  if(idx >= 0) { const d = disputes.splice(idx, 1)[0]; d.status = 'resolved'; resolvedDisputes.unshift(d); renderDisputes(); showToast('Case marked resolved ✓','success'); }
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  const btn = document.getElementById('darkModeToggle');
+  if(btn) btn.checked = !isDark;
+  document.querySelectorAll('.theme-toggle-btn').forEach(b => b.textContent = isDark ? '🌙' : '☀️');
+}
+function applyThemeFromToggle() {
+  const checked = document.getElementById('darkModeToggle')?.checked;
+  document.documentElement.setAttribute('data-theme', checked ? 'dark' : 'light');
+  document.querySelectorAll('.theme-toggle-btn').forEach(b => b.textContent = checked ? '🌙' : '☀️');
+}
+function setDefaultCurrency(c) { defaultCurrency = c; showToast(`Default currency: ${c} ✓`); }
+function changeLang(l) { showToast(`Language changed: ${l} ✓`); }
+function saveSettings() {
+  const name = document.getElementById('settingsUsername')?.value;
+  if(name) {
+    document.getElementById('sidebarName').textContent = name;
+    const init = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const av = document.getElementById('sidebarAvatar'); if(av) av.textContent = init;
+    const pa = document.getElementById('profileAvatar'); if(pa) pa.textContent = init;
+    const pn = document.getElementById('profileName'); if(pn) pn.textContent = name;
+  }
+  showToast('Settings saved ✓', 'success');
+}
+
+// ============================================================
+// MODAL UTIL
+// ============================================================
+function closeModal(id) { document.getElementById(id).classList.remove('open'); currentModalCard = null; }
+document.addEventListener('click', e => {
+  ['cardModal','disputeModal'].forEach(id => {
+    const m = document.getElementById(id);
+    if(m && e.target === m) closeModal(id);
+  });
+});
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type='') {
+  const stack = document.getElementById('toastStack');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' ' + type : '');
+  t.textContent = msg;
+  stack.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+}
+
+// ============================================================
+// COUNTER
+// ============================================================
+function animateCounter(id, target) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  let v = 0;
+  const step = Math.ceil(target/60);
+  const t = setInterval(() => {
+    v = Math.min(v + step, target);
+    el.textContent = v.toLocaleString();
+    if(v >= target) clearInterval(t);
+  }, 16);
+}
+</script>
+</body>
+</html>
